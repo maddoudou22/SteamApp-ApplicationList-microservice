@@ -15,8 +15,8 @@ Parameters:
   bucketS3:
     Description: "Bucket contenant les artefacts des services pour leur integration et leur deploiement (codes source et templates des ChangeSet des services)."
     Type: 'String'
-    Default: "steamapp.applicationlist.microservice"
-    AllowedPattern: '[a-z0-9]+'
+    Default: "steamappapplicationlist"
+    AllowedPattern: '[a-z0-9\\.]+'
 
   # TODO : generer automatiquement une nouvelle cle de chiffrement
   EncryptionKeyARN:
@@ -49,11 +49,44 @@ Parameters:
   TemplateName:
     Description: Nom du template CloudFormation pour le deploiement de la stack applicative.
     Type: String
-    Default: "steamApp-template-export.yml"
+    Default: "steamAppList-template-export.yml"
     
     
 Resources:
 
+
+#------------------------------------------------------------------------------------------------------------
+#- Creation du Bucket S3 hebergeant les artefacts compiles et templates du microservice ---------------------
+#------------------------------------------------------------------------------------------------------------
+
+  # Creation du bucket lui-meme :
+#  ArtefactsBucket:
+#    Type: AWS::S3::Bucket
+#    Properties:
+#      BucketName: !Ref bucketS3
+#      AccessControl: Private
+      
+      
+  # Policy associee au bucket :
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref bucketS3
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:s3:::${bucketS3}
+              - !Sub arn:aws:s3:::${bucketS3}/*
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+                - codebuild.amazonaws.com
+                
+                
 
 #------------------------------------------------------------------------------------------------------------
 #- Role CloudFormation pour le cycle de vie du ChangeSet ----------------------------------------------------
@@ -404,26 +437,3 @@ Resources:
           Type: KMS
               
               
-#------------------------------------------------------------------------------------------------------------
-#- S3 bucket Policy -----------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------
-
-
-  S3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref bucketS3
-      PolicyDocument:
-        Statement:
-          -
-            Action:
-              - s3:*
-            Effect: Allow
-            Resource:
-              - !Sub arn:aws:s3:::${bucketS3}
-              - !Sub arn:aws:s3:::${bucketS3}/*
-            Principal:
-              Service:
-                - codepipeline.amazonaws.com
-                - codebuild.amazonaws.com
-                

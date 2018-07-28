@@ -136,6 +136,11 @@ Resources:
                 Resource: "*"
               -
                 Effect: Allow
+                Action:
+                 - dynamodb:*
+                Resource: "*"
+              -
+                Effect: Allow
                 Action: "*"
                 Resource: arn:aws:apigateway:eu-west-1::*
               -

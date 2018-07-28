@@ -164,7 +164,7 @@ Resources:
       Role: !GetAtt SteamAppApplicationListRoleFormation.Arn
       Runtime: nodejs8.10
       Timeout: 6
-      CodeUri: S3://steamappformation/SteamApplicationList-Workstation.zip
+#      CodeUri: S3://steamappapplicationlist/SteamApplicationList-Workstation.zip
       # X-Ray doit être activé manuellement via le paramètre 'ActiveTracing' dans la console de chaque fonction Lambda
       #TracingConfig: # Activation de X-ray : supporté pour "AWS::Lambda::Function" mais pas "AWS::Serverless::Function". "AWS::Lambda::Function" n'intègre pas aussi bien les API gateway
       #  Mode: "Active"

@@ -13,8 +13,7 @@ phases:
       - mv source/node_modules .
       - mv source/package-lock.json .
       - rm -rf source buildspec.yml
-      - aws cloudformation package --debug --template steamAppList-template.yml --kms-key-id $S3_KEY --s3-bucket $S3_BUCKET --output-template steamAppList-template-export.yml
+      - aws cloudformation package --debug --template steamApp-applicationList-template.yml --kms-key-id $S3_KEY --s3-bucket $S3_BUCKET --output-template steamApp-applicationList-template-export.yml
 artifacts:
   files:
-    - steamAppList-template-export.yml
-
+    - steamApp-applicationList-template-export.yml

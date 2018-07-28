@@ -15,7 +15,7 @@ Parameters:
   bucketS3:
     Description: "Bucket contenant les artefacts des services pour leur integration et leur deploiement (codes source et templates des ChangeSet des services)."
     Type: 'String'
-    Default: "steamappapplicationlist"
+    Default: "steamapp.applicationlist.microservice"
     AllowedPattern: '[a-z0-9\\.]+'
 
   # TODO : generer automatiquement une nouvelle cle de chiffrement
@@ -49,7 +49,7 @@ Parameters:
   TemplateName:
     Description: Nom du template CloudFormation pour le deploiement de la stack applicative.
     Type: String
-    Default: "steamAppList-template-export.yml"
+    Default: "steamApp-applicationList-template-export.yml"
     
     
 Resources:
@@ -60,11 +60,11 @@ Resources:
 #------------------------------------------------------------------------------------------------------------
 
   # Creation du bucket lui-meme :
-#  ArtefactsBucket:
-#    Type: AWS::S3::Bucket
-#    Properties:
-#      BucketName: !Ref bucketS3
-#      AccessControl: Private
+  ArtefactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref bucketS3
+      AccessControl: Private
       
       
   # Policy associee au bucket :

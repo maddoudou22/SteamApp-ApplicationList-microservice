@@ -1,0 +1,267 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: deploiement de l'application Steam Check Price Evolution - Microservice "Liste des applications"
+    # - Table DynamoDB 'SteamApp-table-formation' : liste l'ensemble des applications Steams pour lesquelles on souhaite verifier le prix
+    # - API Gateway 'SteamApp-applicationList-APIG-formation' : trigger de la fonction 'SteamApp-applicationList-formation'
+    # - Role 'SteamApp-applicationList-role-formation' : role porte par la fonction 'SteamApp-applicationList-lambda-formation' pour lui donner les droits suivants :
+    #   - Accès total à CloudWatch
+    #   - Scan de la table DynamoDB
+    # - Fonction Lambda 'SteamApp-applicationList-lambda-formation' : invoquee via l'API Gateway et renvoyant la liste des applications depuis la table DynamoDB
+
+    
+Parameters:
+  aliasName: #environnement
+    Description: "Environnement de déploiement"
+    Type: 'String'
+    Default: "dev"
+
+  steamUrl:
+    Description: "URL de Steam utilisee pour recuperer le prix de chaque application"
+    Type: 'String'
+    Default: "https://store.steampowered.com/api/appdetails?appids="
+
+  deploymentType:
+    Description: "Modalite de deploiement pour la fonction"
+    Type: 'String'
+    Default: "AllAtOnce"
+
+  fileTestInput:
+    Description: "Fichier contenant le corps de la requete passee a la fonction Lambda pour son test"
+    Type: 'String'
+    Default: "test-input.json"
+
+  fileTestExpected:
+    Description: "Fichier contenant la chaine de ccaracteres attendue pour valider le test"
+    Type: 'String'
+    Default: "test-expectedResult.json"
+    
+    
+Resources:
+
+#--------------------------------------------------------------------------------------------------------------------------------
+#---- Microservice de persistance des applications ------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------
+
+  # Table DynamoDB 'SteamApp-table-formation' : liste l'ensemble des applications Steams pour lesquelles on souhaite verifier le prix
+  SteamApptableformation:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "SteamApp-table-formation"
+      AttributeDefinitions:
+        -
+          AttributeName: "phonetiqueAlexa"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "phonetiqueAlexa"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+        
+  # Permission d'invocation de la fonction Lambda 'SteamAppApplicationListLambdaFormation' par l'API Gateway 'SteamAppApplicationListAPIGformation'. Cette permission doit être créée avant la ressource de l'API Gateway dans ce template.
+  ApiGatewayLambdaInvokePermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::GetAtt:
+          - "SteamAppApplicationListLambdaFormation"
+          - "Arn"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub |-
+        arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*
+        
+        
+  # API Gateway 'SteamApp-applicationList-APIG-formation' : trigger de la fonction 'SteamApp-applicationList-formation'
+  SteamAppApplicationListAPIGformation:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref aliasName
+      DefinitionBody:
+        ### SWAGGER_START !!! DO NOT ALTER THIS LINE !!!
+            swagger: 2.0
+            info:
+              title: "SteamApp-applicationList-APIG-formation"
+            #basePath: /${aliasName}
+            schemes:
+            - https
+            paths:
+              "/":
+                get:
+                  produces:
+                  - application/json
+                  responses:
+                    '200':
+                      description: 200 response
+                      schema:
+                        $ref: "#/definitions/Empty"
+        ### SWAGGER_END !!! DO NOT ALTER THIS LINE !!!
+                  x-amazon-apigateway-integration:
+                    responses:
+                      default:
+                        statusCode: 200
+                    uri:
+                      #Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SteamAppApplicationListLambdaFormation.Arn}/invocations
+                      Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SteamAppApplicationListLambdaFormation.Arn}:${aliasName}/invocations
+                    passthroughBehavior: when_no_match
+                    httpMethod: POST # Pour l'appel de fonction Lambda c'est toujours POST, même lorsqu'on en fait que du GET
+                    type: aws
+            definitions:
+              Empty:
+                type: object
+                title: Empty Schema
+
+                
+  # - Role 'SteamApp-applicationList-role-formation' : role porte par la fonction 'SteamApp-applicationList-lambda-formation' pour lui donner les droits suivants :
+  #   - Accès total à CloudWatch
+  #   - Scan de la table DynamoDB
+  SteamAppApplicationListRoleFormation: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          #
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 
+                - "sts:AssumeRole"
+      Path: "/"
+      Policies: 
+        - 
+          PolicyName: "SteamApp-applicationList-Policy-formation"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              # Autorisation de scanner la table DynamoDB :
+              - Effect: "Allow"
+                Action: 
+                    - dynamodb:DescribeTable
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:GetItem
+                Resource: !GetAtt SteamApptableformation.Arn
+              # Autorisation de creer des logs dans CloudWatch :
+              - Effect: "Allow"
+                Action: 
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                Resource: "*"
+
+                
+  # Fonction Lambda 'SteamApp-applicationList-lambda-formation' : invoquee via l'API Gateway et renvoyant la liste des applications depuis la table DynamoDB
+  SteamAppApplicationListLambdaFormation:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: 'SteamApp-applicationList-lambda-formation'
+      Handler: index.handler
+      Role: !GetAtt SteamAppApplicationListRoleFormation.Arn
+      Runtime: nodejs8.10
+      Timeout: 6
+      CodeUri: S3://steamappformation/SteamApplicationList-Workstation.zip
+      # X-Ray doit être activé manuellement via le paramètre 'ActiveTracing' dans la console de chaque fonction Lambda
+      #TracingConfig: # Activation de X-ray : supporté pour "AWS::Lambda::Function" mais pas "AWS::Serverless::Function". "AWS::Lambda::Function" n'intègre pas aussi bien les API gateway
+      #  Mode: "Active"
+      
+      # Definition des modalites de deploiement de la fonction :
+      AutoPublishAlias: !Ref aliasName
+      DeploymentPreference:
+        Type: !Ref deploymentType
+        Alarms:
+         - !Ref LambdaErrorAlarm
+        Hooks:
+            PreTraffic: !Ref deploiementSteamAppPreTrafficHook
+
+            
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref SteamApptableformation
+          
+      Events:
+        PostApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SteamAppApplicationListAPIGformation
+            Path: /
+            Method: get
+
+  deploiementSteamAppPreTrafficHook:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: deploiementSteamAppTrafficHook.handler
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+              - "codedeploy:PutLifecycleEventHookExecutionStatus"
+            Resource:
+              !Sub 'arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${ServerlessDeploymentApplication}/*'
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+              - "lambda:InvokeFunction"
+            Resource: !Ref SteamAppApplicationListLambdaFormation.Version
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+              - "cloudwatch:PutMetricAlarm"
+            Resource: "*"
+      Runtime: nodejs6.10
+      FunctionName: 'CodeDeployHook_steamApp_preTrafficHook' #Pour creer un Hook, CodeDeploy cree automatiquement un role qui ne peut executer des fonctions de Hook dont le nom  commence par 'CodeDeployHook_*' uniquement
+      DeploymentPreference:
+        Enabled: false
+      Environment:
+        Variables:
+          CurrentVersion: !Ref SteamAppApplicationListLambdaFormation.Version
+          aliasName: !Ref aliasName
+          fileTestInput: !Ref fileTestInput
+          fileTestExpected: !Ref fileTestExpected
+          cloudformationAlarm: !Ref LambdaErrorAlarm
+
+          
+  # Creation d'une alarme permettant de verifier le nombre d'erreurs lors du deploiement de cette fonction par CodeDeploy.
+  # Si le nombre d'erreurs atteind 10 durant le deploiement, celui-ce est annule (rollback par CodeDeploy)
+  LambdaErrorAlarm:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+#      AlarmName: "deploiement-java-testNouvelleVersion"
+#      AlarmDescription: "Alerte sur le nombre d'erreurs remontees par la nouvelle version deployee"
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Unit: Count
+      Period: '60'
+      EvaluationPeriods: '1'
+      Threshold: '10'
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+      - Name: FunctionName
+        Value: "TempName"
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------------
+#---- Outputs -------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------
+
+Outputs:
+    apigurl:
+        Description: API Gateway URL
+        Value: 
+            Fn::Join:
+            - ""
+            - - "https://"
+              - Ref: "SteamAppApplicationListAPIGformation"
+              - ".execute-api."
+              - !Ref "AWS::Region"
+              - ".amazonaws.com/"
+              - Ref: aliasName

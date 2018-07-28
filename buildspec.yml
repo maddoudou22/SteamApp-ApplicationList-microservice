@@ -6,7 +6,7 @@ phases:
       - echo Entering build phase...
       - echo Build started on `date`
       - cd source
-      - npm install request
+      - npm install aws-xray-sdk
       - cd ..
       - pip install --upgrade awscli
       - mv source/index.js .

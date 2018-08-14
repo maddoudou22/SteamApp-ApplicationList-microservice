@@ -56,17 +56,17 @@ exports.handler = (event, context, callback) => {
         invoquefonctionCible(lambda, targetVersion, stringTestInput, function(responseFromTargetFunction){
 	    // A revoir ...
             const responseParse = JSON.parse(responseFromTargetFunction);
-            const responseBody = JSON.stringify(responseParse.body);
-            console.log("responseFromTargetFunction : ", responseBody);
-console.log("message : ", responseParse.body.message);
+            const responseBodyMessage = JSON.stringify(responseParse.body.message);
+            console.log("responseFromTargetFunction : ", responseBodyMessage);
+//console.log("message : ", responseParse.body.message);
             console.log("stringTestExpected : ", stringTestExpected);
 
             // Comparaison de la reponse de la fonction avec le resultat de test attendu :
             if (responseBody.trim() == stringTestExpected.trim()) resultatFinal = 'Succeeded';
 
-//			 else resultatFinal = 'Failed';
+			 else resultatFinal = 'Failed';
 // TODO : pour un premier deploiement on considere que le test est toujours OK. A voir comment realiser un test personalise pour chaque microservice plus tard ...
-			else resultatFinal = 'Succeeded';
+//			else resultatFinal = 'Succeeded';
 
             creeAlarmeCloudwatch(cloudwatch, cloudformationAlarm, targetFunctionName, aliasName, versionToTest, function(responseAlarmCreation){
                   console.log("verdict de la creation d'alarme : " + responseAlarmCreation);

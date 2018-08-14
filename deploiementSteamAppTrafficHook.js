@@ -58,7 +58,7 @@ exports.handler = (event, context, callback) => {
             const responseParse = JSON.parse(responseFromTargetFunction);
             const responseBody = JSON.stringify(responseParse.body);
             console.log("responseFromTargetFunction : ", responseBody);
-console.log("message : ", responseBody.message);
+console.log("message : ", responseParse.message);
             console.log("stringTestExpected : ", stringTestExpected);
 
             // Comparaison de la reponse de la fonction avec le resultat de test attendu :

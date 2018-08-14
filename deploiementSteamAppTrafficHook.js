@@ -62,7 +62,7 @@ exports.handler = (event, context, callback) => {
             console.log("stringTestExpected : ", stringTestExpected);
 
             // Comparaison de la reponse de la fonction avec le resultat de test attendu :
-            if (responseBody.trim() == stringTestExpected.trim()) resultatFinal = 'Succeeded';
+            if (responseBodyMessage.trim() == stringTestExpected.trim()) resultatFinal = 'Succeeded';
 
 			 else resultatFinal = 'Failed';
 // TODO : pour un premier deploiement on considere que le test est toujours OK. A voir comment realiser un test personalise pour chaque microservice plus tard ...

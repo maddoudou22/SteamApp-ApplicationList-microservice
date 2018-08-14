@@ -193,6 +193,7 @@ Resources:
                 Action:
                  - cloudwatch:PutMetricAlarm
                  - cloudwatch:DeleteAlarms
+                 - cloudwatch:DescribeAlarms
                 # Supprimer ID du compte !
                 Resource: "*"
 

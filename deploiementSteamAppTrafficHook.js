@@ -63,10 +63,7 @@ exports.handler = (event, context, callback) => {
 
             // Comparaison de la reponse de la fonction avec le resultat de test attendu :
             if (responseBodyMessage.trim() == stringTestExpected.trim()) resultatFinal = 'Succeeded';
-
-			 else resultatFinal = 'Failed';
-// TODO : pour un premier deploiement on considere que le test est toujours OK. A voir comment realiser un test personalise pour chaque microservice plus tard ...
-//			else resultatFinal = 'Succeeded';
+		    else resultatFinal = 'Failed';
 
             creeAlarmeCloudwatch(cloudwatch, cloudformationAlarm, targetFunctionName, aliasName, versionToTest, function(responseAlarmCreation){
                   console.log("verdict de la creation d'alarme : " + responseAlarmCreation);

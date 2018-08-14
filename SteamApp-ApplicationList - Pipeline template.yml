@@ -43,7 +43,6 @@ Parameters:
   GitHubOAuthToken:
     Description: Token Oauth de GitHub. (A generer et recuperer depuis GitHub dans Settings -> Developer Settings -> Personnal Access Tokens)
     Type: String
-# A supprimer du template !
     Default: ""
     
   TemplateName:

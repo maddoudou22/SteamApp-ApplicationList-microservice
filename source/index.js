@@ -3,12 +3,17 @@
 
 const AWSXRay = require('aws-xray-sdk');
 const AWS = require('aws-sdk');
+const AWS = AWSXRay.captureAWS(require('aws-sdk'));
 //const AWS = AWSXRay.captureAWS(require('aws-sdk'));
 
-AWS.config.update({region: 'eu-west-1'});
+const AWS_region = process.env.AWS_REGION;
+AWS.config.update({region: AWS_region});
+
 
 exports.handler = (event, context, callback) => {
-        
+    
+	
+	
 	// Création d'un subsegment X-Ray permettant de suivre l'execution d'une partie du code et remonter des annotations dans les traces X-Ray :
     AWSXRay.captureFunc('RecupListeApplications', function(subsegment){
         subsegment.addAnnotation('traceGlobale', `Evolution_Prix_Depuis_Lambda`);

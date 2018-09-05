@@ -16,11 +16,6 @@ Parameters:
     Type: 'String'
     Default: "dev"
 
-#  steamUrl:
-#    Description: "URL de Steam utilisee pour recuperer le prix de chaque application"
-#    Type: 'String'
-#    Default: "https://store.steampowered.com/api/appdetails?appids="
-
   deploymentType:
     Description: "Modalite de deploiement pour la fonction"
     Type: 'String'
@@ -181,6 +176,7 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE_NAME: !Ref SteamApptableformation
+          AWS_REGION: ${AWS::Region}
           
       Events:
         PostApiEvent:

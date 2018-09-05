@@ -10,11 +10,17 @@ Parameters:
     Type: String
     Default: "SteamApp-ApplicationList-microservice"
     AllowedPattern: '[A-Za-z0-9-]+'
+  
+  accountID:
+    Description: Identifiant du compte AWS associé au microservice
+    Type: String
+    Default: "962109799108"
+    #AllowedPattern: '[0-9]+'
     
   # TODO : generer automatiquement un nouveau Bucket.
   bucketS3:
     Description: "Bucket contenant les artefacts des services pour leur integration et leur deploiement (codes source et templates des ChangeSet des services)."
-    Type: 'String'
+    Type: String
     Default: "steamapp.applicationlist.microservice"
     AllowedPattern: '[a-z0-9\\.]+'
 
@@ -126,8 +132,7 @@ Resources:
                 Effect: Allow
                 Action:
                  - lambda:*
-                # Supprimer ID du compte !
-                Resource: arn:aws:lambda:eu-west-1:962109799108:function:*
+                Resource: !Sub arn:aws:lambda:${AWS::Region}:${accountID}:function:*
               -
                 Effect: Allow
                 Action:
@@ -141,7 +146,7 @@ Resources:
               -
                 Effect: Allow
                 Action: "*"
-                Resource: arn:aws:apigateway:eu-west-1::*
+                Resource: arn:aws:apigateway:${AWS::Region}::*
               -
                 Effect: Allow
                 Action:
@@ -152,8 +157,7 @@ Resources:
                  - iam:AttachRolePolicy
                  - iam:DeleteRolePolicy
                  - iam:DetachRolePolicy
-                # Supprimer ID du compte !
-                Resource: arn:aws:iam::962109799108:role/*
+                Resource: arn:aws:iam::${accountID}:role/*
               -
                 Effect: Allow
                 Action:
@@ -163,7 +167,7 @@ Resources:
                 Effect: Allow
                 Action:
                  - cloudformation:CreateChangeSet
-                Resource: arn:aws:cloudformation:eu-west-1:aws:transform/Serverless-2016-10-31
+                Resource: arn:aws:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31
               -
                 Effect: Allow
                 Action:
@@ -173,7 +177,7 @@ Resources:
                  - codedeploy:DeleteDeploymentGroup
                  - codedeploy:GetDeployment
                 # Supprimer ID du compte !
-                Resource: arn:aws:codedeploy:eu-west-1:962109799108:deploymentgroup:*
+                Resource: arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentgroup:*
               -
                 Effect: Allow
                 Action:
@@ -181,13 +185,13 @@ Resources:
                  - codedeploy:DeleteApplication
                  - codedeploy:RegisterApplicationRevision
                 # Supprimer ID du compte !
-                Resource: arn:aws:codedeploy:eu-west-1:962109799108:application:*
+                Resource: arn:aws:codedeploy:${AWS::Region}:${accountID}:application:*
               -
                 Effect: Allow
                 Action:
                  - codedeploy:GetDeploymentConfig
                 # Supprimer ID du compte !
-                Resource: arn:aws:codedeploy:eu-west-1:962109799108:deploymentconfig:*
+                Resource: arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentconfig:*
               -
                 Effect: Allow
                 Action:

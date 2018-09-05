@@ -1,5 +1,5 @@
 
-// Note : cette fonction Lambda a une API Gateway comme trigger
+// Note : cette fonction Lambda à une API Gateway comme trigger
 
 const AWSXRay = require('aws-xray-sdk');
 const AWS = require('aws-sdk');

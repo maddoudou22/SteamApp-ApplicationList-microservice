@@ -17,7 +17,6 @@ Parameters:
     Default: "962109799108"
     AllowedPattern: '[0-9]+'
     
-  # TODO : generer automatiquement un nouveau Bucket.
   bucketS3:
     Description: "Bucket contenant les artefacts des services pour leur integration et leur deploiement (codes source et templates des ChangeSet des services)."
     Type: String

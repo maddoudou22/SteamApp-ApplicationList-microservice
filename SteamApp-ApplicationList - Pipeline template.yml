@@ -15,7 +15,7 @@ Parameters:
     Description: Identifiant du compte AWS associé au microservice
     Type: String
     Default: "962109799108"
-    #AllowedPattern: '[0-9]+'
+    AllowedPattern: '[0-9]+'
     
   # TODO : generer automatiquement un nouveau Bucket.
   bucketS3:

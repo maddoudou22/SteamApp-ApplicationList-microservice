@@ -206,7 +206,8 @@ Resources:
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
-            Resource: !Ref SteamAppApplicationListLambdaFormation.Version
+            Resource: !Sub ${SteamAppApplicationListLambdaFormation}:*
+            #Resource: !Ref SteamAppApplicationListLambdaFormation.Version
         - Version: "2012-10-17"
           Statement:
           - Effect: "Allow"

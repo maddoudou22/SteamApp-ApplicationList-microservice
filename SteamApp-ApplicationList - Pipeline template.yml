@@ -133,6 +133,7 @@ Resources:
                 Action:
                  - lambda:*
                 Resource: !Sub arn:aws:lambda:${AWS::Region}:${accountID}:function:*
+                #Resource: !Sub arn:aws:lambda:${AWS::Region}:${accountID}:function:*
               -
                 Effect: Allow
                 Action:
@@ -146,7 +147,7 @@ Resources:
               -
                 Effect: Allow
                 Action: "*"
-                Resource: arn:aws:apigateway:${AWS::Region}::*
+                Resource: !Sub arn:aws:apigateway:${AWS::Region}::*
               -
                 Effect: Allow
                 Action:
@@ -157,7 +158,7 @@ Resources:
                  - iam:AttachRolePolicy
                  - iam:DeleteRolePolicy
                  - iam:DetachRolePolicy
-                Resource: arn:aws:iam::${accountID}:role/*
+                Resource: !Sub arn:aws:iam::${accountID}:role/*
               -
                 Effect: Allow
                 Action:
@@ -167,7 +168,7 @@ Resources:
                 Effect: Allow
                 Action:
                  - cloudformation:CreateChangeSet
-                Resource: arn:aws:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31
+                Resource: !Sub arn:aws:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31
               -
                 Effect: Allow
                 Action:
@@ -177,7 +178,7 @@ Resources:
                  - codedeploy:DeleteDeploymentGroup
                  - codedeploy:GetDeployment
                 # Supprimer ID du compte !
-                Resource: arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentgroup:*
+                Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentgroup:*
               -
                 Effect: Allow
                 Action:
@@ -185,13 +186,13 @@ Resources:
                  - codedeploy:DeleteApplication
                  - codedeploy:RegisterApplicationRevision
                 # Supprimer ID du compte !
-                Resource: arn:aws:codedeploy:${AWS::Region}:${accountID}:application:*
+                Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${accountID}:application:*
               -
                 Effect: Allow
                 Action:
                  - codedeploy:GetDeploymentConfig
                 # Supprimer ID du compte !
-                Resource: arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentconfig:*
+                Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentconfig:*
               -
                 Effect: Allow
                 Action:

@@ -176,7 +176,7 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE_NAME: !Ref SteamApptableformation
-          AWS_REGION: ${AWS::Region}
+          #AWS_REGION: ${AWS::Region}
           
       Events:
         PostApiEvent:

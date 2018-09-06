@@ -207,9 +207,6 @@ Resources:
             Action:
               - "lambda:InvokeFunction"
             Resource: !Ref SteamAppApplicationListLambdaFormation.Version
-            #Resource:
-            #  !Sub 'arn:aws:lambda:${AWS::Region}:*:function:SteamApp-applicationList-lambda-formation:*'
-            #arn:aws:lambda:eu-west-1:962109799108:function:SteamApp-coordinatorKinesis-lambda-formation:*
         - Version: "2012-10-17"
           Statement:
           - Effect: "Allow"

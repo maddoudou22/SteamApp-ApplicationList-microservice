@@ -10,6 +10,12 @@ Parameters:
     Type: String
     Default: "SteamApp-ApplicationList-microservice"
     AllowedPattern: '[A-Za-z0-9-]+'
+  
+#  accountID:
+#    Description: Identifiant du compte AWS associé au microservice
+#    Type: String
+#    Default: "962109799108"
+#    AllowedPattern: '[0-9]+'
     
   bucketS3:
     Description: "Bucket contenant les artefacts des services pour leur integration et leur deploiement (codes source et templates des ChangeSet des services)."
@@ -63,11 +69,11 @@ Resources:
       AccessControl: Private
 
       
+
+      
   # Policy associee au bucket :
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
-    #Si la Policy est créée avant le bucket la création de la stack échoue :
-    DependsOn: ArtefactsBucket
     Properties:
       Bucket: !Ref bucketS3
       PolicyDocument:
@@ -125,6 +131,7 @@ Resources:
                 Effect: Allow
                 Action:
                  - lambda:*
+                #Resource: !Sub arn:aws:lambda:${AWS::Region}:${accountID}:function:*
                 Resource: 
                   - !Join
                     - ''
@@ -157,6 +164,7 @@ Resources:
                  - iam:AttachRolePolicy
                  - iam:DeleteRolePolicy
                  - iam:DetachRolePolicy
+                #Resource: !Sub arn:aws:iam::${accountID}:role/*
                 Resource: 
                   - !Join
                     - ''
@@ -181,6 +189,8 @@ Resources:
                  - codedeploy:UpdateDeploymentGroup
                  - codedeploy:DeleteDeploymentGroup
                  - codedeploy:GetDeployment
+                # Supprimer ID du compte !
+                #Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentgroup:*
                 Resource: 
                   - !Join
                     - ''
@@ -195,6 +205,8 @@ Resources:
                  - codedeploy:CreateApplication
                  - codedeploy:DeleteApplication
                  - codedeploy:RegisterApplicationRevision
+                # Supprimer ID du compte !
+                #Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${accountID}:application:*
                 Resource: 
                   - !Join
                     - ''
@@ -207,6 +219,8 @@ Resources:
                 Effect: Allow
                 Action:
                  - codedeploy:GetDeploymentConfig
+                # Supprimer ID du compte !
+                #Resource: !Sub arn:aws:codedeploy:${AWS::Region}:${accountID}:deploymentconfig:*
                 Resource: 
                   - !Join
                     - ''
@@ -221,6 +235,7 @@ Resources:
                  - cloudwatch:PutMetricAlarm
                  - cloudwatch:DeleteAlarms
                  - cloudwatch:DescribeAlarms
+                # Supprimer ID du compte !
                 Resource: "*"
 
                 
@@ -338,8 +353,12 @@ Resources:
                   - iam:ListRoles
                   - cloudformation:Describe*
                   - cloudFormation:List*
+#                  - codecommit:List*
                   - codecommit:GetCommit
+#                  - codecommit:Get*
+#                  - codecommit:GitPull
                   - codecommit:UploadArchive
+#                  - codecommit:CancelUploadArchive
                   - codebuild:BatchGetBuilds
                   - codebuild:StartBuild
                   - cloudformation:CreateStack
@@ -353,8 +372,18 @@ Resources:
                   - cloudformation:SetStackPolicy
                   - cloudformation:ValidateTemplate
                   - iam:PassRole
+#                  - s3:ListAllMyBuckets
+#                  - s3:GetBucketLocation
                 Resource:
                   - "*"
+#              -
+#                Effect: Allow
+#                Action:
+#                    - codebuild:*
+#                    - s3:*
+#                    - cloudformation:*
+#                    - iam:PassRole
+#                Resource: "*"
               -
                 Effect: Allow
                 Action:
